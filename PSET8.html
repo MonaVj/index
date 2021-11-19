@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PSET8</title>
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        #tooltip.hidden {
+            display: none;
+        }
+
+        #tooltip {
+            position: absolute;
+            padding: 5px;
+            background-color: white;
+            border: solid gray 1px;
+            Z-index:1;
+        }
+        #value {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12px;
+        }
+        
+        g.tick text {
+             font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
+        }
+       
+        h1 {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 24px;
+        }
+ 	</style>
+</head>
+<body>
+	 <div id="tooltip" class="hidden">
+            <p>
+                <span id="value">100</span>
+            </p>
+        </div>  
+    <main class="container" >
+     <div class="row">
+     	<div class="col-6">
+     		<br><br>
+     		 <h1>Boston 311 Requests</h1>
+            <!-- D3 visualization here -->
+            <div id="bar-chart"></div>
+     		<hr>
+     	</div>
+     </div>
+
+        </main>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">              
+
+<script type="text/javascript">
+        const width = 800;
+        const height = 600;
+        const marginLeft= 300;
+        const marginOther = 30;
+
+        const svg = d3.select("#bar-chart")
+            .append("svg")
+            .attr("viewBox", [0, 0, width + marginOther + marginLeft, height + marginOther*2]);
+    
+    
+
+  function plotBarChart(dataset) {
+     
+    const xArray = dataset.map(d => d.columnName);
+    const xValues = dataset.map(d => {
+     return d.total_count});
+    
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(xValues)])
+        .range([0, width]);
+    
+    svg.append("g")
+        .call(d3.axisTop(xScale)
+              .ticks(6))
+              .attr("transform", "translate (300, 30)")
+              
+    const yArray = dataset.map(d => d.columnName);
+    const yValues = dataset.map(d => {
+     return d.Name});
+    
+   const yScale = d3.scaleBand()
+        .domain(yValues)
+        .range([0, height - marginOther])
+        .padding(0.15);
+    
+    svg.append("g")
+        .call(d3.axisLeft(yScale)
+              .tickSize(0)
+              .tickSizeOuter(3)
+              )
+              .attr("transform", "translate (300, 30)")
+    svg.append("g")
+    .attr("class", "bars")
+// create bar rectangles
+    .selectAll("rect")
+    .data(dataset)
+    .enter()
+        .append("rect")
+        .attr("y", d => yScale(d.Name)+marginOther)
+        .attr("x", marginLeft)
+        .attr("width", d => xScale(d.total_count))
+        .attr("height",d => yScale.bandwidth())
+        .attr("fill","teal")
+      
+       .on("mouseover", function(event, d) {
+            d3.select("#tooltip")
+                    .style("left", event.pageX + "px")
+                    .style("top", event.pageY + "px")
+                .select("#value")
+                    
+                    .html("<p>" + String(d.total_count) + "</p>"); 
+            
+            d3.select("#tooltip")
+                .classed("hidden", false);
+        })
+        .on("mouseout", function() {
+            d3.select("#tooltip")
+                .classed("hidden", true);
+        })
+
+  };
+     
+   
+       // load csv data
+        d3.csv("./boston_311.csv", d3.autoType)
+            .then(function(data) {
+                console.log(data);
+
+                plotBarChart(data);
+            })
+      
+    </script>
+    </body>
+</html>
